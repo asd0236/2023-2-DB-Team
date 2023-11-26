@@ -1,0 +1,110 @@
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+
+import oracle.jdbc.OracleTypes;
+
+/*  --- 아래 두 프로시저가 HMART 스키마에 정의되어 있어야 함
+
+CREATE or REPLACE PROCEDURE SP_우수고객(V_적립금 IN number, V_인원수 OUT number)
+AS
+BEGIN
+    SELECT count(*) INTO V_인원수 FROM 고객
+    WHERE 적립금 > V_적립금;
+END;
+
+CREATE or REPLACE PROCEDURE SP_잠재고객( IDs out SYS_REFCURSOR ) AS
+BEGIN
+    OPEN IDs for 
+      SELECT 고객아이디, 고객이름 FROM 고객 
+      where 나이 < 30 and 등급 =  'gold';
+END;
+
+*/
+
+
+public class DB_Conn_Query {
+   Connection con = null;
+   String url = "jdbc:oracle:thin:@localhost:1521:XE";
+   String id = "C###";      String password = "1234"; // 본인의 id를 사용해야합니다.
+   
+   public DB_Conn_Query() {
+     try {
+    	Class.forName("oracle.jdbc.driver.OracleDriver");
+        System.out.println("드라이버 적재 성공");
+     } catch (ClassNotFoundException e) { System.out.println("No Driver."); }  
+   }
+   
+   
+   private void DB_Connect() {
+     try {
+         con = DriverManager.getConnection(url, id, password);
+         System.out.println("DB 연결 성공");
+     } catch (SQLException e) {         System.out.println("Connection Fail");      }
+   }
+   
+   
+   private void sqlRun(String br, int ro) throws SQLException{   // 단순 검색
+    //String query = "select * from PARTTIMER"; 
+    // 특정 지점 및 호실의 알바생 목록 - 매개 변수로 지점(br), 호실(ro)의 정보가 들어왔을 때 
+     String query = "SELECT ASSIGNMENT.알바생번호, PARTTIMER.이름, PARTTIMER.전화번호, PARTTIMER.주소, PARTTIMER.계좌번호, PARTTIMER.멘토알바생번호 " +
+             "FROM ASSIGNMENT, PARTTIMER " +
+             "WHERE ASSIGNMENT.지점코드 = " + br + " AND ASSIGNMENT.호실번호 = " + ro + " AND ASSIGNMENT.알바생번호 = PARTTIMER.알바생번호";
+    try { DB_Connect();
+    //Statement : GUI에서 특정 지점 및 호실을 선택 후 알바생 목록 버튼을 클릭하면 알바생들의 정보를 DB에서 가져와 보여주는 기능
+    	  Statement stmt = con.createStatement();
+          ResultSet rs = stmt.executeQuery(query);
+          while (rs.next()) {
+              System.out.print("\t" + rs.getString("알바생번호"));
+              System.out.print("\t" + rs.getString("이름"));
+              System.out.print("\t" + rs.getString("전화번호"));
+              System.out.print("\t" + rs.getString("주소"));
+              System.out.print("\t" + rs.getString("계좌번호"));
+              System.out.print("\t" + rs.getString("멘토알바생번호") + '\n');         
+           }
+          stmt.close();    rs.close();
+    } catch (SQLException e) { e.printStackTrace(); 
+    } finally {   con.close(); }
+    
+   }
+   private void sqlRun2_callable(String from_br, int from_ro, String to_br, int to_ro) {   // in out parameter
+   
+	   try { DB_Connect();
+		   CallableStatement cstmt = con.prepareCall("{MOVE_PARTTIMERS(?, ?, ?, ?)}");
+		   cstmt.setString(1, from_br);
+		   cstmt.setInt(2, from_ro);
+		   cstmt.setString(3, to_br);
+		   cstmt.setInt(4, to_ro);
+		   //cstmt.registerOutParameter(2,  Types.INTEGER);
+		   cstmt.executeQuery();
+		   //System.out.println(cstmt.getInt(2));
+
+		   cstmt.close();    con.close();  // finally 없이 
+		   System.out.println("저장 프로시저가 실행됨");
+	   } catch (SQLException e) { e.printStackTrace(); }
+   }
+//   private void sqlRun3_callable() {   // cursor 반환
+//
+//	   try {
+//		   CallableStatement cstmt = con.prepareCall("{call SP_잠재고객(?)}");
+//		   cstmt.registerOutParameter(1, OracleTypes.CURSOR);
+//		   cstmt.executeQuery();
+//		   ResultSet rs = (ResultSet)cstmt.getObject(1);
+//		   while( rs.next( ) ) {
+//			   System.out.println(rs.getString(1)+",\t"+rs.getString(2));
+//		   }
+//		   cstmt.close();    rs.close();   con.close();  
+//	   } catch (SQLException e) { e.printStackTrace(); }
+//   }
+
+public static void main(String arg[]) throws SQLException {
+       DB_Conn_Query dbconquery = new DB_Conn_Query();
+       dbconquery.sqlRun("132", 1002);
+       //dbconquery.sqlRun2_callable();
+       //dbconquery.DB_Connect();       dbconquery.sqlRun3_callable();
+    }
+}

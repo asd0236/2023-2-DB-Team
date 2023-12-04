@@ -1,39 +1,58 @@
 -- 1. 저장 프로시저
--- ‘배정’ 테이블과 ‘근무기록’ 테이블을 비교해 한 알바생이 성실히 근무하였는지 여부를 알 수 있는 기능을 수행(배정일과 근무 날짜를 비교했을 때,
--- 모두 출근을 하였으면 “배정받은 0일 모두 근무하였습니다.”를 띄우고, 며칠 빼먹었으면 “배정받은 0일 중 0일을 근무하였습니다.”를 띄우고,
--- 모든 날짜에 근무하지 않았으면 “근무한 기록이 존재하지 않습니다.”를 띄운다.)
+-- ‘근무기록’ 테이블을 통해 일정 기간동안의 알바생의 출,퇴근 기록을 반환하는 기능을 수행
 
-CREATE OR REPLACE PROCEDURE CHECK_WORK_RECORD (
-    p_alba_number VARCHAR2
+CREATE OR REPLACE PROCEDURE GET_WORK_HISTORY(
+    p_alba_id VARCHAR2,
+    p_start_date DATE,
+    p_end_date DATE,
+    p_cursor OUT SYS_REFCURSOR
 ) AS
 BEGIN
-    DECLARE
-        v_total_days NUMBER;
-        v_worked_days NUMBER := 0;
-    BEGIN
-        SELECT COUNT(DISTINCT 배정일) INTO v_total_days
-        FROM ASSIGNMENT
-        WHERE 알바생번호 = p_alba_number;
-
-        SELECT COUNT(DISTINCT 근무날짜) INTO v_worked_days
+    OPEN p_cursor FOR
+        SELECT 근무날짜, 출근시간, 퇴근시간, 총근무시간
         FROM WORKRECORD
-        WHERE 알바생번호 = p_alba_number;
-
-        IF v_total_days = 0 THEN
-            DBMS_OUTPUT.PUT_LINE('근무한 기록이 존재하지 않습니다.');
-        ELSIF v_worked_days = v_total_days THEN
-            DBMS_OUTPUT.PUT_LINE('배정받은 ' || v_total_days || '일 모두 근무하였습니다.');
-        ELSE
-            DBMS_OUTPUT.PUT_LINE('배정받은 ' || v_total_days || '일 중 ' || v_worked_days || '일을 근무하였습니다.');
-        END IF;
-    END;
+        WHERE 알바생번호 = p_alba_id
+            AND 근무날짜 BETWEEN p_start_date AND p_end_date;
 END;
 /
 
 
-SET SERVEROUTPUT ON;
-EXEC CHECK_WORK_RECORD('00000012');
+-- 샘플 알바생과 근무기록 데이터 생성
+INSERT INTO PARTTIMER VALUES ('00000055', '알바생1', '010-1234-5678', '주소1', '1111-2222', NULL);
+INSERT INTO WORKRECORD VALUES (TO_DATE('2023-01-15', 'YYYY-MM-DD'), TO_TIMESTAMP('08:00:00', 'HH24:MI:SS'), TO_TIMESTAMP('17:00:00', 'HH24:MI:SS'), 9, '00000055');
+INSERT INTO WORKRECORD VALUES (TO_DATE('2023-01-16', 'YYYY-MM-DD'), TO_TIMESTAMP('09:00:00', 'HH24:MI:SS'), TO_TIMESTAMP('18:00:00', 'HH24:MI:SS'), 9, '00000055');
 
+
+-- 테스트용 쿼리
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    p_alba_id VARCHAR2(8) := '00000055';
+    p_start_date DATE := TO_DATE('2023-01-01', 'YYYY-MM-DD');
+    p_end_date DATE := TO_DATE('2023-01-31', 'YYYY-MM-DD');
+    p_cursor SYS_REFCURSOR;
+
+    v_work_date DATE;
+    v_start_time TIMESTAMP;
+    v_end_time TIMESTAMP;
+    v_total_hours NUMBER;
+BEGIN
+    -- 프로시저 호출
+    GET_WORK_HISTORY(p_alba_id, p_start_date, p_end_date, p_cursor);
+    
+    -- 결과 출력
+    LOOP
+        FETCH p_cursor INTO v_work_date, v_start_time, v_end_time, v_total_hours;
+        EXIT WHEN p_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('근무날짜: ' || TO_CHAR(v_work_date, 'YYYY-MM-DD') ||
+                             ' 출근시간: ' || TO_CHAR(v_start_time, 'HH24:MI:SS') ||
+                             ' 퇴근시간: ' || TO_CHAR(v_end_time, 'HH24:MI:SS') ||
+                             ' 총근무시간: ' || v_total_hours || ' 시간');
+    END LOOP;
+    CLOSE p_cursor;
+END;
+/
 
 ----------------------------------------------------------------------------------------
 

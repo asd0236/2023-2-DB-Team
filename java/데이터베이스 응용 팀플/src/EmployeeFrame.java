@@ -17,7 +17,7 @@ public class EmployeeFrame extends JFrame {
 
         employeeList = new JList<>(new String[]{"Alice", "Bob", "Charlie"});
         employeeList.setBorder(new LineBorder(new Color(0, 0, 0)));
-        employeeList.setBounds(10, 10, 680, 371);
+        employeeList.setBounds(12, 10, 680, 371);
         getContentPane().add(employeeList);
 
         JButton deleteButton = new JButton("알바생 삭제");

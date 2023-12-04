@@ -12,8 +12,8 @@ public class LoginHandler {
     private static final String DB_PASSWORD = "1234";  
 
     public boolean authenticateUser(String enteredUsername, String enteredPassword) {
-        // 해시화된 패스워드를 얻기 위한 메서드
-        String hashedPassword = hashPassword(enteredPassword);
+        // 해시화된 패스워드를 얻기 위한 메서드(데이터 베이스에 해시로 암호화 된 정보가 전송되서 그냥 해시 뺌)
+        //String hashedPassword = hashPassword(enteredPassword);
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             String query = "SELECT * FROM ID WHERE USERNAME = ? AND PASSWORD = ?";   //데이터 베이스에 ID 테이블 추가함
@@ -26,7 +26,7 @@ public class LoginHandler {
             
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setString(1, enteredUsername);
-                preparedStatement.setString(2, hashedPassword);
+                preparedStatement.setString(2, enteredPassword);
 
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     return resultSet.next();  // 결과가 있으면 로그인 성공
@@ -39,7 +39,7 @@ public class LoginHandler {
     }
 
     // 패스워드를 해시화하는 메서드
-    private String hashPassword(String password) {
+    /*private String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hashedBytes = md.digest(password.getBytes());
@@ -53,5 +53,5 @@ public class LoginHandler {
             e.printStackTrace();
             return null;
         }
-    }
+    }*/
 }

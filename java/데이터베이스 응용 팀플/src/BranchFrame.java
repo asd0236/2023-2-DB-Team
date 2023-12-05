@@ -38,4 +38,9 @@ public class BranchFrame {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
+	public void setVisible(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

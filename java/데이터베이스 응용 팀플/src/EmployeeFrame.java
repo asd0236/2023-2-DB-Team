@@ -129,8 +129,10 @@ public class EmployeeFrame {
 
                     // Remove row from JTable
                     tableModel.removeRow(selectedRow);
+                    JOptionPane.showMessageDialog(null, "삭제 완료");
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "삭제 오류");
                 }
             }
         }
@@ -156,7 +158,7 @@ public class EmployeeFrame {
 
             int option = JOptionPane.showConfirmDialog(frame, message, "알바생 정보 수정", JOptionPane.OK_CANCEL_OPTION);
             if (option == JOptionPane.OK_OPTION) {
-                String updateQuery = "UPDATE PRATTIMER SET 알바생번호 = ?, 이름 = ?, 전화번호 = ?, 주소 = ?, 계좌번호= ?, 멘토알바생번호 = ? WHERE 알바생번호 = ?";
+                String updateQuery = "UPDATE PARTTIMER SET 알바생번호 = ?, 이름 = ?, 전화번호 = ?, 주소 = ?, 계좌번호= ?, 멘토알바생번호 = ? WHERE 알바생번호 = ?";
                 try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
                     for (int i = 0; i < 6; i++) {
                         preparedStatement.setString(i + 1, textFields[i].getText());
@@ -168,8 +170,10 @@ public class EmployeeFrame {
                     for (int i = 0; i < 6; i++) {
                         tableModel.setValueAt(textFields[i].getText(), selectedRow, i);
                     }
+                    JOptionPane.showMessageDialog(null, "수정 완료");
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "수정 오류");
                 }
             }
         }
@@ -205,9 +209,11 @@ public class EmployeeFrame {
                 for (int i = 0; i < 6; i++) {
                     newRow.add(textFields[i].getText());
                 }
+                JOptionPane.showMessageDialog(null, "추가 완료");
                 tableModel.addRow(newRow);
             } catch (SQLException e) {
                 e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "추가 오류");
             }
         }
     }

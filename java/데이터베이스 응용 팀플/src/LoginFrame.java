@@ -10,15 +10,15 @@ public class LoginFrame extends JFrame {
 
     public LoginFrame() {
     	Container c = getContentPane();
-        setTitle("로그인 화면");
+        setTitle("관리자 로그인");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // JPanel panel = new JPanel();
-        JLabel usernameLabel = new JLabel("아이디 :");
+        JLabel usernameLabel = new JLabel("이름 :");
         usernameLabel.setBounds(218, 216, 76, 67);
-        JLabel passwordLabel = new JLabel("패스워드 :");
-        passwordLabel.setBounds(206, 279, 59, 25);
+        JLabel passwordLabel = new JLabel("관리자번호 :");
+        passwordLabel.setBounds(181, 279, 88, 25);
         usernameField = new JTextField(10);
         usernameField.setBounds(277, 239, 97, 21);
         passwordField = new JPasswordField(10);
@@ -49,7 +49,7 @@ public class LoginFrame extends JFrame {
                             dispose();  // 현재 프레임 닫기
                             new MenuFrame().setVisible(true);
                         } else {
-                            JOptionPane.showMessageDialog(null, "아이디 혹은 비밀번호를 확인해주세요");
+                            JOptionPane.showMessageDialog(null, "이름 혹은 관리자번호를 확인해주세요");
                         }
                     }
                 });

@@ -37,7 +37,12 @@ public class MenuFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // 관리자 화면으로 이동
                 dispose();
-                new ManagerFrame().setVisible(true);
+                try {
+					new ManagerFrame().setVisible(true);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
             }
         });
         managerButton.addActionListener(new ActionListener() {
@@ -45,7 +50,7 @@ public class MenuFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // 급여 관리 화면으로 이동
                 dispose();
-                new ManagerFrame().setVisible(true);
+                new CashFrame().setVisible(true);
             }
         });
         

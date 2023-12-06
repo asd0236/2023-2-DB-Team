@@ -16,13 +16,7 @@ public class LoginHandler {
         //String hashedPassword = hashPassword(enteredPassword);
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String query = "SELECT * FROM ID WHERE USERNAME = ? AND PASSWORD = ?";   //데이터 베이스에 ID 테이블 추가함
-            //CREATE TABLE ID (
-            //username VARCHAR(50) NOT NULL,
-            //password VARCHAR(50) NOT NULL,
-            //PRIMARY KEY (username)
-            //);
-            //Insert into ID ("USERNAME","PASSWORD") values ('123','123');
+            String query = "SELECT * FROM MANAGER WHERE 이름 = ? AND 관리자번호 = ?";   
             
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setString(1, enteredUsername);

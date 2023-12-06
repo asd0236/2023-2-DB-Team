@@ -85,6 +85,20 @@ public class EmployeeFrame {
                 new MenuFrame().setVisible(true);
         	}
         });
+        
+        JButton btnNewButton_1 = new JButton("출,퇴근기록 조회");
+        btnNewButton_1.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		frame.dispose();
+                try {
+					new WorkHistoryFrame().setVisible(true);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        	}
+        });
+        inputPanel.add(btnNewButton_1);
         inputPanel.add(btnNewButton);
 
         frame.setVisible(true);
@@ -148,12 +162,12 @@ public class EmployeeFrame {
             }
 
             Object[] message = {
-                    "Column 1:", textFields[0],
-                    "Column 2:", textFields[1],
-                    "Column 3:", textFields[2],
-                    "Column 4:", textFields[3],
-                    "Column 5:", textFields[4],
-                    "Column 6:", textFields[5]
+                    "알바생번호:", textFields[0],
+                    "이름:", textFields[1],
+                    "전화번호:", textFields[2],
+                    "주소:", textFields[3],
+                    "계좌번호:", textFields[4],
+                    "멘토알바생번호:", textFields[5]
             };
 
             int option = JOptionPane.showConfirmDialog(frame, message, "알바생 정보 수정", JOptionPane.OK_CANCEL_OPTION);

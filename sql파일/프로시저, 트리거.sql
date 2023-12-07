@@ -104,20 +104,21 @@ END;
 -----------------------------------------------------------------------------------
 
 -- 2. 트리거
--- 급여테이블이 갱신(삽입, 삭제, 변경)될 때마다 그 갱신내용을 반영하는 기능 수행
--- (예, 새로운 급여 정보가 입력되면 해당 column을 삽입하고, 급여가 지금되면 지급 여부를 갱신)
+-- SALARY 테이블에서 급여를 지불 했을 때, 입력된 금액이 null이면 급여 지급 여부를 x로 바꿔주는 트리거 수행 
 
 CREATE OR REPLACE TRIGGER SALARY_UPDATE_TRIGGER
-    AFTER INSERT OR UPDATE OR DELETE
-    ON SALARY
-    FOR EACH ROW
+BEFORE INSERT OR UPDATE ON SALARY
+FOR EACH ROW
 BEGIN
-    IF INSERTING THEN
-        -- 새로운 행이 삽입될 때 수행할 작업
-        UPDATE SALARY SET 지급여부 = 'O' WHERE 급여일자 = :NEW.급여일자;
-    END IF;
+  IF :NEW.금액 IS NULL THEN
+    :NEW.지급여부 := 'X';
+  END IF;
 END;
 /
+
+-- 확인문
+INSERT INTO SALARY (급여일자, 알바생번호, 금액, 지급여부)
+VALUES (TO_DATE('2023-12-07', 'YYYY-MM-DD'), '00000006', NULL, 'O');
 
 
 ----------------------------------------------------------------------------------------

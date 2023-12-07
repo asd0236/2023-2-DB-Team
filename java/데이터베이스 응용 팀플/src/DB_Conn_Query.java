@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Date;
 
 import oracle.jdbc.OracleTypes;
 
@@ -78,29 +79,67 @@ public class DB_Conn_Query {
    }
    
    
-   // Callable Statement
-   private void sqlRun3_callable(String from_br, int from_ro, String to_br, int to_ro) {   // 모두 in parameter
+   // Callable Statement 1
+   private void sqlRun3_callable_1(String alba_id, Date start_date, Date end_date) {   // in parameter
    
 	   try { DB_Connect();
-		   CallableStatement cstmt = con.prepareCall("{MOVE_PARTTIMERS(?, ?, ?, ?)}");
-		   cstmt.setString(1, from_br);
-		   cstmt.setInt(2, from_ro);
-		   cstmt.setString(3, to_br);
-		   cstmt.setInt(4, to_ro);
-		   //cstmt.registerOutParameter(2,  Types.INTEGER);
-		   cstmt.executeQuery();
-		   //System.out.println(cstmt.getInt(2));
+		   CallableStatement cstmt = con.prepareCall("{call GET_WORK_HISTORY(?, ?, ?, ?)}");
+		   
+		   // IN 매개변수
+		   
+		   cstmt.setString(1, alba_id);
+		   cstmt.setDate(2, (java.sql.Date) start_date);
+		   cstmt.setDate(3, (java.sql.Date) end_date);
+		   
+		   //OUT 매개변수
+		   cstmt.registerOutParameter(4,  OracleTypes.CURSOR);
+		   cstmt.execute();
+		   //cstmt.executeQuery();
 
-		   cstmt.close();    con.close();  // finally 없이 
+		   // OUT 매개변수에서 결과셋을 가져오기
+           ResultSet rs = (ResultSet) cstmt.getObject(4);
+		   
+        // 결과셋 출력
+           while (rs.next()) {
+        	    System.out.println("근무날짜: " + rs.getDate("근무날짜")
+        	            + ", 출근시간: " + rs.getTimestamp("출근시간").toString()
+        	            + ", 퇴근시간: " + rs.getTimestamp("퇴근시간").toString()
+        	            + ", 총근무시간: " + rs.getDouble("총근무시간"));
+        	}
+           rs.close();
+		   cstmt.close();    //con.close();  // finally 없이 
 		   System.out.println("저장 프로시저가 실행됨");
 	   } catch (SQLException e) { e.printStackTrace(); }
    }
 
+   public void sqlRun3_callable_2(String fromBranchCode, int fromRoomNumber, String toBranchCode, int toRoomNumber) {
+       try {
+           // 저장 프로시저 호출
+           CallableStatement cstmt = con.prepareCall("{call MOVE_PARTTIMERS(?, ?, ?, ?)}");
+           
+           // IN 매개변수 설정
+           cstmt.setString(1, fromBranchCode);
+           cstmt.setInt(2, fromRoomNumber);
+           cstmt.setString(3, toBranchCode);
+           cstmt.setInt(4, toRoomNumber);
+
+           // 프로시저 실행
+           cstmt.execute();
+
+           // 자원 정리
+           cstmt.close();
+           con.close();
+       } catch (SQLException e) {
+           e.printStackTrace();
+       }
+   }
+   
 
 public static void main(String arg[]) throws SQLException {
        DB_Conn_Query dbconquery = new DB_Conn_Query();
        dbconquery.sqlRun("132", 1002);
        dbconquery.sqlRun2(10031);
-       //dbconquery.sqlRun3_callable();
+       dbconquery.sqlRun3_callable_1("00000001", java.sql.Date.valueOf("2023-01-01"), java.sql.Date.valueOf("2023-12-31"));
+       dbconquery.sqlRun3_callable_2("132", 1002, "133", 1001);
     }
 }

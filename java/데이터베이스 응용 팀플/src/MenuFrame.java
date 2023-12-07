@@ -37,12 +37,13 @@ public class MenuFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // 관리자 화면으로 이동
                 dispose();
-                try {
+				try {
 					new ManagerFrame().setVisible(true);
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+				
             }
         });
         managerButton.addActionListener(new ActionListener() {

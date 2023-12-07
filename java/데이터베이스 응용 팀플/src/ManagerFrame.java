@@ -2,10 +2,12 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.table.DefaultTableModel;
+import oracle.jdbc.OracleTypes;
 import java.awt.*;
 import java.sql.*;
 import java.util.Vector;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 
 public class ManagerFrame {
     private JFrame frame;
@@ -35,44 +37,31 @@ public class ManagerFrame {
     }
 
     private void initialize() {
-        frame = new JFrame("관리자");
+        frame = new JFrame("출,퇴근기록 조회");
         frame.setBounds(100, 100, 800, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         tableModel = new DefaultTableModel();
-        tableModel.setColumnIdentifiers(new String[]{"알바생번호", "이름", "전화번호", "주소", "계좌번호", "멘토알바생번호"});
+        tableModel.setColumnIdentifiers(new String[]{"알바생번호", "이름"});
 
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
 
-        JButton deleteButton = new JButton("삭제");
-        deleteButton.addActionListener(new ActionListener() {
+        JButton checkButton = new JButton("조회");
+        checkButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                deleteSelectedRow();
-            }
-        });
-
-        JButton editButton = new JButton("수정");
-        editButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editSelectedRow();
-            }
-        });
-
-        JButton addButton = new JButton("추가");
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addNewRow();
+                try {
+					checkSelectedRow();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
             }
         });
 
         JPanel inputPanel = new JPanel(new GridLayout(1, 8));
-        inputPanel.add(addButton);
-        inputPanel.add(deleteButton);
-        inputPanel.add(editButton);
+        inputPanel.add(checkButton);
 
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -82,9 +71,16 @@ public class ManagerFrame {
         btnNewButton.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
         		frame.dispose();
-                new MenuFrame().setVisible(true);
+                try {
+					new EmployeeFrame().setVisible(true);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
         	}
         });
+        
+        
         inputPanel.add(btnNewButton);
 
         frame.setVisible(true);
@@ -104,10 +100,6 @@ public class ManagerFrame {
                 Vector<Object> row = new Vector<>();
                 row.add(resultSet.getString("알바생번호"));
                 row.add(resultSet.getString("이름"));
-                row.add(resultSet.getString("전화번호"));
-                row.add(resultSet.getString("주소"));
-                row.add(resultSet.getString("계좌번호"));
-                row.add(resultSet.getString("멘토알바생번호"));
                 tableModel.addRow(row);
             }
         } catch (SQLException e) {
@@ -115,105 +107,64 @@ public class ManagerFrame {
         }
     }
 
-    private void deleteSelectedRow() {
+    private void checkSelectedRow() throws SQLException {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
-            int option = JOptionPane.showConfirmDialog(frame, "정말 삭제하시겠습니까?", "Confirmation", JOptionPane.YES_NO_OPTION);
-            if (option == JOptionPane.YES_OPTION) {
-                String valueColumn1 = (String) table.getValueAt(selectedRow, 0);
+            textFields = new JTextField[2];
 
-                String deleteQuery = "DELETE FROM PARTTIMER WHERE 알바생번호 = ?";
-                try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
-                    preparedStatement.setString(1, valueColumn1);
-                    preparedStatement.executeUpdate();
-
-                    // Remove row from JTable
-                    tableModel.removeRow(selectedRow);
-                    JOptionPane.showMessageDialog(null, "삭제 완료");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "삭제 오류");
-                }
-            }
-        }
-    }
-
-    private void editSelectedRow() {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow != -1) {
-            textFields = new JTextField[6];
-
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 2; i++) {
                 textFields[i] = new JTextField((String) table.getValueAt(selectedRow, i));
             }
 
             Object[] message = {
                     "알바생번호:", textFields[0],
                     "이름:", textFields[1],
-                    "전화번호:", textFields[2],
-                    "주소:", textFields[3],
-                    "계좌번호:", textFields[4],
-                    "멘토알바생번호:", textFields[5]
+                   
             };
 
-            int option = JOptionPane.showConfirmDialog(frame, message, "알바생 정보 수정", JOptionPane.OK_CANCEL_OPTION);
+            int option = JOptionPane.showConfirmDialog(frame, message, "날짜 입력", JOptionPane.OK_CANCEL_OPTION);
             if (option == JOptionPane.OK_OPTION) {
-                String updateQuery = "UPDATE PARTTIMER SET 알바생번호 = ?, 이름 = ?, 전화번호 = ?, 주소 = ?, 계좌번호= ?, 멘토알바생번호 = ? WHERE 알바생번호 = ?";
+            	/*  출퇴근 기록 프로시저 GET_WORK_HISTORY
+            	// 프로시저 호출을 위한 CallableStatement 생성
+                String callStatement = "{call GET_WORK_HISTORY(?, ?, ?, ?)}";
+                CallableStatement callableStatement = connection.prepareCall(callStatement);
+                String selectedAlba = "00000001";
+
+                // 입력 매개변수 설정
+                callableStatement.setString(1, selectedAlba);
+                callableStatement.setDate(2, new Date(System.currentTimeMillis())); // 시작 날짜
+                callableStatement.setDate(3, new Date(System.currentTimeMillis())); // 종료 날짜
+                callableStatement.registerOutParameter(4, OracleTypes.CURSOR);
+
+                // 프로시저 실행
+                callableStatement.execute();
+
+                // 결과 처리
+                ResultSet resultSet = (ResultSet) callableStatement.getObject(4);
+                
+               
+                resultSet.close();
+                callableStatement.close();
+                connection.close();*/
+            	
+            	
+            	/*String updateQuery = "UPDATE PARTTIMER SET 알바생번호 = ?, 이름 = ?";
                 try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-                    for (int i = 0; i < 6; i++) {
+                    for (int i = 0; i < 2; i++) {
                         preparedStatement.setString(i + 1, textFields[i].getText());
                     }
                     preparedStatement.setString(7, (String) table.getValueAt(selectedRow, 0));
                     preparedStatement.executeUpdate();
 
                     // Update data in JTable
-                    for (int i = 0; i < 6; i++) {
+                    for (int i = 0; i < 2; i++) {
                         tableModel.setValueAt(textFields[i].getText(), selectedRow, i);
                     }
                     JOptionPane.showMessageDialog(null, "수정 완료");
                 } catch (SQLException e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(null, "수정 오류");
-                }
-            }
-        }
-    }
-
-    private void addNewRow() {
-        textFields = new JTextField[6];
-
-        for (int i = 0; i < 6; i++) {
-            textFields[i] = new JTextField();
-        }
-
-        Object[] message = {
-                "알바생번호:", textFields[0],
-                "이름:", textFields[1],
-                "전화번호:", textFields[2],
-                "주소:", textFields[3],
-                "계좌번호:", textFields[4],
-                "멘토알바생번호:", textFields[5]
-        };
-
-        int option = JOptionPane.showConfirmDialog(frame, message, "알바생 추가", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            String insertQuery = "INSERT INTO PARTTIMER (알바생번호,이름, 전화번호, 주소, 계좌번호, 멘토알바생번호) VALUES (?, ?, ?, ?, ?, ?)";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-                for (int i = 0; i < 6; i++) {
-                    preparedStatement.setString(i + 1, textFields[i].getText());
-                }
-                preparedStatement.executeUpdate();
-
-                // Add new row to JTable
-                Vector<Object> newRow = new Vector<>();
-                for (int i = 0; i < 6; i++) {
-                    newRow.add(textFields[i].getText());
-                }
-                JOptionPane.showMessageDialog(null, "추가 완료");
-                tableModel.addRow(newRow);
-            } catch (SQLException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, "추가 오류");
+                }*/
             }
         }
     }

@@ -15,7 +15,7 @@ BEGIN
             AND 근무날짜 BETWEEN p_start_date AND p_end_date;
 END;
 /
-commit;
+
 
 
 -- 샘플 알바생과 근무기록 데이터 생성

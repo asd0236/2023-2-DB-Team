@@ -8,46 +8,55 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Date;
 
-public class CashFrame extends JFrame {
+public class WorkHistoryFrame2 extends JFrame {
     private JTextField albaIdField;
     private JTextField startDateField;
     private JTextField endDateField;
     private JTextArea resultArea;
 
-    public CashFrame() {
+    public WorkHistoryFrame2() {
         super("Work History GUI");
         getContentPane().setLayout(null);
 
         // Components
         JLabel label = new JLabel("알바생번호:");
-        label.setBounds(0, 0, 379, 90);
+        label.setBounds(102, 15, 84, 59);
         getContentPane().add(label);
         albaIdField = new JTextField();
-        albaIdField.setBounds(379, 0, 379, 90);
+        albaIdField.setBounds(194, 26, 236, 37);
         getContentPane().add(albaIdField);
 
         JLabel label_1 = new JLabel("시작 날짜 (yy-MM-dd):");
-        label_1.setBounds(0, 90, 379, 90);
+        label_1.setBounds(36, 67, 137, 59);
         getContentPane().add(label_1);
         startDateField = new JTextField();
-        startDateField.setBounds(379, 90, 379, 90);
+        startDateField.setBounds(194, 78, 236, 37);
         getContentPane().add(startDateField);
 
         JLabel label_2 = new JLabel("종료 날짜 (yy-MM-dd):");
-        label_2.setBounds(0, 180, 379, 90);
+        label_2.setBounds(36, 120, 137, 59);
         getContentPane().add(label_2);
         endDateField = new JTextField();
-        endDateField.setBounds(379, 180, 379, 90);
+        endDateField.setBounds(194, 131, 236, 37);
         getContentPane().add(endDateField);
 
         resultArea = new JTextArea();
-        resultArea.setBounds(0, 270, 379, 90);
+        resultArea.setBounds(0, 231, 585, 129);
         resultArea.setEditable(false);
         getContentPane().add(resultArea);
 
         JButton submitButton = new JButton("확인");
-        submitButton.setBounds(379, 270, 379, 90);
+        submitButton.setBounds(321, 178, 109, 37);
         getContentPane().add(submitButton);
+        
+        JButton btnNewButton = new JButton("뒤로가기");
+        btnNewButton.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+				dispose();
+        	}
+        });
+        btnNewButton.setBounds(464, 178, 109, 37);
+        getContentPane().add(btnNewButton);
 
         // Event handling
         submitButton.addActionListener(new ActionListener() {
@@ -104,7 +113,7 @@ public class CashFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        CashFrame gui = new CashFrame();
+        WorkHistoryFrame2 gui = new WorkHistoryFrame2();
         gui.setSize(600, 400);
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gui.setVisible(true);

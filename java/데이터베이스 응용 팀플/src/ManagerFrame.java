@@ -6,7 +6,6 @@ import oracle.jdbc.OracleTypes;
 import java.awt.*;
 import java.sql.*;
 import java.util.Vector;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 
 public class ManagerFrame {
@@ -37,12 +36,12 @@ public class ManagerFrame {
     }
 
     private void initialize() {
-        frame = new JFrame("출,퇴근기록 조회");
+        frame = new JFrame("관리자 관리");
         frame.setBounds(100, 100, 800, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         tableModel = new DefaultTableModel();
-        tableModel.setColumnIdentifiers(new String[]{"알바생번호", "이름"});
+        tableModel.setColumnIdentifiers(new String[]{"관리자번호", "이름"});
 
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
@@ -51,6 +50,7 @@ public class ManagerFrame {
         checkButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+            	
                 try {
 					checkSelectedRow();
 				} catch (SQLException e1) {
@@ -106,6 +106,38 @@ public class ManagerFrame {
             e.printStackTrace();
         }
     }
+    public class DB_Conn_Query {
+    	   Connection con = null;
+    	   String url = "jdbc:oracle:thin:@localhost:1521:XE";
+    	   String id = "C##tt1";      String password = "1234"; // 본인의 id를 사용해야합니다.
+    	   private void DB_Connect() {
+    		     try {
+    		         con = DriverManager.getConnection(url, id, password);
+    		         System.out.println("DB 연결 성공");
+    		     } catch (SQLException e) {         System.out.println("Connection Fail");      }
+    		   }
+    	   // PreparedStatement : GUI에서 특정 관리자를 선택하면 해당 관리자가 관리하는 지점들의 정보를 DB에서 가져와 보여주는 기능
+    	   private void sqlRun2_1(int managerId) throws SQLException{   // 단순 검색
+        
+    		   try { DB_Connect();
+    		   // PreparedStatement : GUI에서 특정 관리자를 선택하면 해당 관리자가 관리하는 지점들의 정보를 DB에서 가져와 보여주는 기능
+    		   String query = "SELECT 지점코드, 지점명, 주소 FROM BRANCH WHERE 관리자번호 = ?";
+    		   PreparedStatement pstmt = con.prepareStatement(query);
+    		   pstmt.setInt(1, managerId);
+    		   ResultSet rs = pstmt.executeQuery();
+		    
+    		   while (rs.next()) {
+    			   System.out.print("\t" + rs.getString("지점코드"));
+    			   System.out.print("\t" + rs.getString("지점명"));
+    			   System.out.print("\t" + rs.getString("주소") + '\n');       
+    		   }
+    		   pstmt.close();    rs.close();
+    		   } catch (SQLException e) { e.printStackTrace(); 
+    		   } finally {   con.close(); }
+	    
+	   }
+    }
+    
 
     private void checkSelectedRow() throws SQLException {
         int selectedRow = table.getSelectedRow();
@@ -124,47 +156,7 @@ public class ManagerFrame {
 
             int option = JOptionPane.showConfirmDialog(frame, message, "날짜 입력", JOptionPane.OK_CANCEL_OPTION);
             if (option == JOptionPane.OK_OPTION) {
-            	/*  출퇴근 기록 프로시저 GET_WORK_HISTORY
-            	// 프로시저 호출을 위한 CallableStatement 생성
-                String callStatement = "{call GET_WORK_HISTORY(?, ?, ?, ?)}";
-                CallableStatement callableStatement = connection.prepareCall(callStatement);
-                String selectedAlba = "00000001";
-
-                // 입력 매개변수 설정
-                callableStatement.setString(1, selectedAlba);
-                callableStatement.setDate(2, new Date(System.currentTimeMillis())); // 시작 날짜
-                callableStatement.setDate(3, new Date(System.currentTimeMillis())); // 종료 날짜
-                callableStatement.registerOutParameter(4, OracleTypes.CURSOR);
-
-                // 프로시저 실행
-                callableStatement.execute();
-
-                // 결과 처리
-                ResultSet resultSet = (ResultSet) callableStatement.getObject(4);
-                
-               
-                resultSet.close();
-                callableStatement.close();
-                connection.close();*/
             	
-            	
-            	/*String updateQuery = "UPDATE PARTTIMER SET 알바생번호 = ?, 이름 = ?";
-                try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-                    for (int i = 0; i < 2; i++) {
-                        preparedStatement.setString(i + 1, textFields[i].getText());
-                    }
-                    preparedStatement.setString(7, (String) table.getValueAt(selectedRow, 0));
-                    preparedStatement.executeUpdate();
-
-                    // Update data in JTable
-                    for (int i = 0; i < 2; i++) {
-                        tableModel.setValueAt(textFields[i].getText(), selectedRow, i);
-                    }
-                    JOptionPane.showMessageDialog(null, "수정 완료");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "수정 오류");
-                }*/
             }
         }
     }

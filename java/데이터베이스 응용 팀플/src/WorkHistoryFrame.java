@@ -53,12 +53,13 @@ public class WorkHistoryFrame {
         checkButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
+            	new WorkHistoryFrame2().setVisible(true);
+                /*try {
 					checkSelectedRow();
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}
+				}*/
             }
         });
 
@@ -124,8 +125,8 @@ public class WorkHistoryFrame {
                    
             };
 
-            int option = JOptionPane.showConfirmDialog(frame, message, "날짜 입력", JOptionPane.OK_CANCEL_OPTION);
-            if (option == JOptionPane.OK_OPTION) {
+            //int option = JOptionPane.showConfirmDialog(frame, message, "날짜 입력", JOptionPane.OK_CANCEL_OPTION);
+            //if (option == JOptionPane.OK_OPTION) {
             	/*  출퇴근 기록 프로시저 GET_WORK_HISTORY
             	// 프로시저 호출을 위한 CallableStatement 생성
                 String callStatement = "{call GET_WORK_HISTORY(?, ?, ?, ?)}";
@@ -167,7 +168,7 @@ public class WorkHistoryFrame {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(null, "수정 오류");
                 }*/
-            }
+            //}
         }
     }
 

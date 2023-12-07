@@ -1,10 +1,10 @@
 -- 1. 저장 프로시저
 -- ‘근무기록’ 테이블을 통해 일정 기간동안의 알바생의 출,퇴근 기록을 반환하는 기능을 수행
 
-create or replace PROCEDURE GET_WORK_HISTORY(
+CREATE OR REPLACE PROCEDURE GET_WORK_HISTORY(
     p_alba_id VARCHAR2,
-    p_start_date TIMESTAMP,
-    p_end_date TIMESTAMP,
+    p_start_date DATE,
+    p_end_date DATE,
     p_cursor OUT SYS_REFCURSOR
 ) AS
 BEGIN
@@ -16,7 +16,6 @@ BEGIN
 END;
 /
 
-commit;
 
 
 -- 샘플 알바생과 근무기록 데이터 생성
